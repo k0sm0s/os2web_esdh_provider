@@ -132,23 +132,21 @@ function os2web_esdh_provider_cron() {
     $meetings = os2web_esdh_provider_invoke('mm', 'get_import_list');
     $queue = DrupalQueue::get('mm_import');
     //if ($queue->numberOfItems() == 0) {
-
       $meetings_path = variable_get('os2web_meetings_path');
+      $module_exists = module_exists("os2dagsorden_pdf_converter");
       foreach ($meetings as $meeting) {
+          if($module_exists){
+              $xmlDoc = new DOMDocument();
+              $xmlDoc->load($meeting['uri']);
 
+              $field = $xmlDoc->getElementsByTagName("field");
 
-          $xmlDoc = new DOMDocument();
-          $xmlDoc->load($meeting['uri']);
+              foreach ($field as $f) {
+                  if($f->hasAttribute("filesfolder")){
+                      $path = $meetings_path .  $f->getAttribute("filesfolder");
 
-          $field = $xmlDoc->getElementsByTagName("field");
-
-          foreach ($field as $f) {
-              if($f->hasAttribute("filesfolder")){
-                  $path = $meetings_path .  $f->getAttribute("filesfolder");
-
-                  db_insert("os2dagsorden_pdf_converter_directories")
-                      ->fields(array("dirname" => $path))
-                      ->execute();
+                      os2dagsorden_pdf_converter_add_dir($path);
+                  }
               }
           }
 
