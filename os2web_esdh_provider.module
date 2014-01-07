@@ -133,6 +133,8 @@ function os2web_esdh_provider_cron() {
     $queue = DrupalQueue::get('mm_import');
     //if ($queue->numberOfItems() == 0) {
       $meetings_path = variable_get('os2web_meetings_path');
+      if($meetings_path == "private://")
+          $meetings_path = $_SERVER['DOCUMENT_ROOT'] . base_path() . variable_get("file_private_path") . "/";
       $module_exists = module_exists("os2dagsorden_pdf_converter");
       foreach ($meetings as $meeting) {
           if($module_exists){
